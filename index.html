@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Belote / C.Gasnier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#3CB371">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body { background: linear-gradient(to bottom, #2E8B57, #3CB371); padding: 5px; min-height: 100vh; color: white; font-family: sans-serif; overflow-x: hidden; }
+        .main-container { max-width: 600px; margin: 0 auto; padding: 2px; position: relative; }
+        .card { margin-bottom: 5px; color: black; border-radius: 10px; }
+        .atout-display { width: 80px; height: 80px; border: 3px solid black; border-radius: 12px; background-color: white; display: flex; justify-content: center; align-items: center; font-size: 4rem; margin: 0 auto 2px; color: black; line-height: 1; }
+        .atout-option { width: 42px; height: 42px; border: 2px solid black; border-radius: 8px; background-color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.5rem; }
+        .atout-selector { display: flex; gap: 5px; justify-content: center; margin-bottom: 5px; }
+        .score-zone { position: relative; }
+        .mini-clavier { display: none; grid-template-columns: repeat(3, 1fr); gap: 2px; position: absolute; top: 100%; left: 0; width: 100%; z-index: 100; background: rgba(0,0,0,0.9); padding: 5px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .key { border: 1px solid rgba(255,255,255,0.2); font-weight: bold; font-size: 1.3rem; padding: 10px 0; cursor: pointer; text-align: center; border-radius: 4px; }
+        .key-0 { grid-column: 2; }
+        .clavier-eq1 .key { background-color: #007bff; color: white; }
+        .clavier-eq2 .key { background-color: #dc3545; color: white; }
+        .score-input { width: 85px; height: 50px; font-size: 1.6rem; text-align: center; margin: 0 auto; border: 2px solid white; border-radius: 8px; background: white; color: black; }
+        .score-input.active { border: 3px solid #FFD700 !important; box-shadow: 0 0 10px #FFD700; }
+        #valeurEcart { font-size: 2.2rem !important; line-height: 1; }
+        .badge-tour-central { font-size: 0.9rem !important; padding: 5px; border: 1px solid #FFD700; line-height: 1.1; width: 100%; display: block; }
+        .donneur-highlight { color: #FFD700; text-shadow: 1px 1px 2px black; font-weight: bold; }
+        .belote-indicator { font-size: 0.9rem; color: #FFD700; display: block; height: 1.2rem; font-weight: bold; }
+        #pageHistorique { display: none; }
+        .belote-capot-row { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-around; font-size: 0.9rem; }
+        .radio-group { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .radio-group input { cursor: pointer; width: 18px; height: 18px; }
+        #overlayFin { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; border-radius: 10px; align-items: center; justify-content: center; font-weight: bold; font-size: 1.8rem; text-align: center; color: #FFD700; padding: 20px; }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <div id="overlayFin" onclick="this.style.display='none'">PARTIE TERMINÉE !<br><small style="font-size: 1rem; color: white;">(Cliquez pour voir les scores)</small></div>
+        
+        <div class="nav-btn-container text-center mb-1" id="navBtns" style="display: none;">
+            <button class="btn btn-sm btn-light" onclick="afficherPage('jeu')">Score</button>
+            <button class="btn btn-sm btn-outline-light" onclick="afficherPage('hist')">Historique</button>
+        </div>
+
+        <div id="pageJeu">
+            <div id="setupTour" style="display: none;" class="text-center mb-2">
+                <div class="atout-selector">
+                    <div class="atout-option text-danger" onclick="selectAtout('♥', 'text-danger')">♥</div>
+                    <div class="atout-option text-dark" onclick="selectAtout('♠', 'text-dark')">♠</div>
+                    <div class="atout-option text-danger" onclick="selectAtout('♦', 'text-danger')">♦</div>
+                    <div class="atout-option text-dark" onclick="selectAtout('♣', 'text-dark')">♣</div>
+                </div>
+                <select id="selectPreneur" class="form-select form-select-sm mb-1 mx-auto" style="max-width: 150px;" onchange="annoncerPreneur()"></select>
+            </div>
+
+            <div class="text-center mb-2">
+                <div class="atout-display" id="atoutDisplay"></div>
+                <h5 class="mb-0">Belote / C. Gasnier</h5>
+                <div class="small">Donneur : <span id="donneur" class="donneur-highlight">Aucun</span> <i class="fas fa-redo ms-1" onclick="donneurSuivantManuel()"></i></div>
+            </div>
+
+            <div class="row g-2 align-items-start mb-3" style="min-height: 180px;">
+                <div class="col-5 text-center score-zone">
+                    <span id="star1" class="belote-indicator"></span>
+                    <div class="card bg-light mb-1">
+                        <div class="card-header bg-primary text-white p-1 small text-truncate" id="nomEquipe1">Eq 1</div>
+                        <div class="card-body p-2"><p class="h3 mb-0" id="scoreEquipe1">0</p></div>
+                    </div>
+                    <input type="text" id="pointsEquipe1" class="form-control score-input" onclick="toggleClavier(1)" readonly placeholder="0">
+                    <div id="clavier1" class="mini-clavier clavier-eq1">
+                        <div class="key" onclick="ajouterChiffre(1)">1</div><div class="key" onclick="ajouterChiffre(2)">2</div><div class="key" onclick="ajouterChiffre(3)">3</div>
+                        <div class="key" onclick="ajouterChiffre(4)">4</div><div class="key" onclick="ajouterChiffre(5)">5</div><div class="key" onclick="ajouterChiffre(6)">6</div>
+                        <div class="key" onclick="ajouterChiffre(7)">7</div><div class="key" onclick="ajouterChiffre(8)">8</div><div class="key" onclick="ajouterChiffre(9)">9</div>
+                        <div class="key key-0" onclick="ajouterChiffre(0)">0</div>
+                    </div>
+                </div>
+
+                <div class="col-2 text-center px-0 pt-3">
+                    <div class="small text-white-50" style="font-size: 0.7rem;">DIFF</div>
+                    <div class="fw-bold text-warning mb-2" id="valeurEcart">0</div>
+                    <span class="badge bg-dark badge-tour-central">TOUR<br><span id="tourActuel">1/12</span></span>
+                </div>
+
+                <div class="col-5 text-center score-zone">
+                    <span id="star2" class="belote-indicator"></span>
+                    <div class="card bg-light mb-1">
+                        <div class="card-header bg-danger text-white p-1 small text-truncate" id="nomEquipe2">Eq 2</div>
+                        <div class="card-body p-2"><p class="h3 mb-0" id="scoreEquipe2">0</p></div>
+                    </div>
+                    <input type="text" id="pointsEquipe2" class="form-control score-input" onclick="toggleClavier(2)" readonly placeholder="0">
+                    <div id="clavier2" class="mini-clavier clavier-eq2">
+                        <div class="key" onclick="ajouterChiffre(1)">1</div><div class="key" onclick="ajouterChiffre(2)">2</div><div class="key" onclick="ajouterChiffre(3)">3</div>
+                        <div class="key" onclick="ajouterChiffre(4)">4</div><div class="key" onclick="ajouterChiffre(5)">5</div><div class="key" onclick="ajouterChiffre(6)">6</div>
+                        <div class="key" onclick="ajouterChiffre(7)">7</div><div class="key" onclick="ajouterChiffre(8)">8</div><div class="key" onclick="ajouterChiffre(9)">9</div>
+                        <div class="key key-0" onclick="ajouterChiffre(0)">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="belote-capot-row">
+                <div class="fw-bold">Belote / Capot :</div>
+                <div class="radio-group" onclick="document.getElementById('eq1').checked=true">
+                    <input type="radio" name="equipeSelectionnee" id="eq1" value="0" checked>
+                    <span>Équipe 1</span>
+                </div>
+                <div class="radio-group" onclick="document.getElementById('eq2').checked=true">
+                    <input type="radio" name="equipeSelectionnee" id="eq2" value="1">
+                    <span>Équipe 2</span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-2 mb-3">
+                <button class="btn btn-primary px-4" id="btnValider" onclick="validerTour()">Valider Tour</button>
+                <button class="btn btn-warning px-4" onclick="effacerChiffres()">Effacer</button>
+            </div>
+
+            <div class="text-center">
+                <div class="d-flex flex-wrap justify-content-center gap-1 mb-2">
+                    <button class="btn btn-success" onclick="ajouterBeloteEnMemoire()">Belote</button>
+                    <button class="btn btn-danger" onclick="ajouterCapot()">Capot</button>
+                    <button class="btn btn-info text-white" onclick="annonceManuelle()"><i class="fas fa-volume-up"></i> Score</button>
+                    <button class="btn btn-secondary" onclick="annulerDernier()">Annuler</button>
+                    <button class="btn btn-dark" onclick="confirmationNouvellePartie()">Nouv. Partie</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="pageHistorique">
+            <h5 class="text-center">Historique</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-dark table-striped text-center">
+                    <thead><tr><th>T</th><th>Éq1</th><th>Éq2</th><th>Atout</th><th>Preneur</th></tr></thead>
+                    <tbody id="tableauHistorique"></tbody>
+                </table>
+            </div>
+            <button class="btn btn-primary w-100 mt-2" onclick="afficherPage('jeu')">Retour</button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="saisieJoueursModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog"><div class="modal-content text-dark">
+            <div class="modal-header"><h5>Nouvelle Partie</h5></div>
+            <div class="modal-body">
+                <input type="text" id="j1" class="form-control mb-2" placeholder="Vous">
+                <input type="text" id="j2" class="form-control mb-2" placeholder="Joueur G">
+                <input type="text" id="j3" class="form-control mb-2" placeholder="Partenaire">
+                <input type="text" id="j4" class="form-control mb-2" placeholder="Joueur D">
+                <label class="small fw-bold">Donneur :</label>
+                <select id="pDonneur" class="form-select">
+                    <option value="0">Vous</option><option value="1">Joueur G</option><option value="2">Partenaire</option><option value="3">Joueur D</option>
+                </select>
+            </div>
+            <div class="modal-footer"><button class="btn btn-primary w-100" onclick="demarrer()">Go !</button></div>
+        </div></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let scores = [0, 0], historique = [], joueurs = [], tour = 1, dIdx = 0, eqActive = 0, atout = "", partieEnCours = false, beloteEnAttente = null;
+
+        window.addEventListener('beforeunload', (e) => {
+            if (partieEnCours) {
+                e.preventDefault();
+                e.returnValue = 'La partie est en cours. Voulez-vous vraiment quitter ?';
+            }
+        });
+
+        function annonceVocale(txt) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(txt);
+                u.lang = 'fr-FR';
+                window.speechSynthesis.speak(u);
+            }
+        }
+
+        function toggleClavier(n) {
+            if(tour > 12) return;
+            eqActive = (eqActive === n) ? 0 : n;
+            document.getElementById("pointsEquipe1").classList.toggle("active", eqActive === 1);
+            document.getElementById("pointsEquipe2").classList.toggle("active", eqActive === 2);
+            document.getElementById("clavier1").style.display = (eqActive === 1) ? "grid" : "none";
+            document.getElementById("clavier2").style.display = (eqActive === 2) ? "grid" : "none";
+        }
+
+        function ajouterChiffre(c) {
+            if (eqActive === 0) return;
+            const inp = document.getElementById(`pointsEquipe${eqActive}`);
+            const autreInp = document.getElementById(`pointsEquipe${eqActive===1?2:1}`);
+            let val = inp.value + c;
+            if (parseInt(val) <= 162) {
+                inp.value = parseInt(val);
+                autreInp.value = 162 - parseInt(val);
+            }
+        }
+
+        function effacerChiffres() { 
+            document.getElementById("pointsEquipe1").value = ""; 
+            document.getElementById("pointsEquipe2").value = ""; 
+            beloteEnAttente = null;
+            document.getElementById("star1").textContent = "";
+            document.getElementById("star2").textContent = "";
+        }
+
+        function selectAtout(s, c) { 
+            if(tour > 12) return;
+            atout = s; 
+            document.getElementById("atoutDisplay").innerHTML = `<span class="${c}">${s}</span>`;
+            let n = s==='♥'?'Cœur':s==='♠'?'Pique':s==='♦'?'Carreau':'Trèfle';
+            annonceVocale("L'atout pour ce tour est " + n);
+        }
+
+        function annoncerPreneur() {
+            const sel = document.getElementById("selectPreneur");
+            const nom = sel.options[sel.selectedIndex].text;
+            if (sel.value !== "" && tour <= 12) {
+                annonceVocale("C'est " + nom + " qui a pris");
+            }
+        }
+
+        function MAJ_Donneur() { 
+            const n = joueurs[dIdx];
+            document.getElementById("donneur").textContent = n; 
+            if(partieEnCours && tour <= 12) annonceVocale("Le donneur pour ce tour est " + n);
+        }
+
+        function demarrer() {
+            joueurs = [
+                document.getElementById("j1").value || "Vous", 
+                document.getElementById("j2").value || "J.G", 
+                document.getElementById("j3").value || "Partenaire", 
+                document.getElementById("j4").value || "J.D"
+            ];
+            localStorage.setItem('belote_j1', joueurs[0]);
+            localStorage.setItem('belote_j2', joueurs[1]);
+            localStorage.setItem('belote_j3', joueurs[2]);
+            localStorage.setItem('belote_j4', joueurs[3]);
+            const sel = document.getElementById("selectPreneur");
+            sel.innerHTML = '<option value="">Preneur ?</option>';
+            joueurs.forEach((j, i) => { sel.innerHTML += `<option value="${i}">${j}</option>`; });
+            dIdx = parseInt(document.getElementById("pDonneur").value);
+            document.getElementById("nomEquipe1").textContent = joueurs[0] + " & " + joueurs[2];
+            document.getElementById("nomEquipe2").textContent = joueurs[1] + " & " + joueurs[3];
+            document.getElementById("setupTour").style.display = "block";
+            document.getElementById("navBtns").style.display = "block";
+            partieEnCours = true;
+            MAJ_Donneur();
+            bootstrap.Modal.getInstance(document.getElementById("saisieJoueursModal")).hide();
+        }
+
+        function validerTour() {
+            if(tour > 12) return;
+            const selP = document.getElementById("selectPreneur");
+            let preneurNom = selP.selectedIndex > 0 ? selP.options[selP.selectedIndex].text : "-";
+            
+            let p1 = parseInt(document.getElementById("pointsEquipe1").value) || 0;
+            let p2 = parseInt(document.getElementById("pointsEquipe2").value) || 0;
+            if (p1 === 0 && p2 === 0) return;
+            if (beloteEnAttente === 0) p1 += 20; else if (beloteEnAttente === 1) p2 += 20;
+            
+            historique.push({ t: tour, p1, p2, at: atout, pr: preneurNom });
+            scores[0] += p1; scores[1] += p2;
+            MAJ_Tableau(); effacerChiffres();
+            atout = ""; document.getElementById("atoutDisplay").innerHTML = "";
+            document.getElementById("selectPreneur").value = "";
+            
+            if (tour < 12) {
+                tour++; dIdx = (dIdx + 1) % 4;
+                document.getElementById("tourActuel").textContent = tour + "/12";
+                MAJ_Donneur();
+            } else {
+                tour = 13;
+                partieEnCours = false;
+                document.getElementById("tourActuel").textContent = "FIN";
+                document.getElementById("btnValider").disabled = true;
+                document.getElementById("overlayFin").style.display = "flex";
+                annoncerFinPartie();
+            }
+            eqActive = 0;
+            document.getElementById("clavier1").style.display = "none";
+            document.getElementById("clavier2").style.display = "none";
+        }
+
+        function annoncerFinPartie() {
+            let gagnants = scores[0] > scores[1] ? (joueurs[0] + " et " + joueurs[2]) : (joueurs[1] + " et " + joueurs[3]);
+            let perdants = scores[0] > scores[1] ? (joueurs[1] + " et " + joueurs[3]) : (joueurs[0] + " et " + joueurs[2]);
+            let ecart = Math.abs(scores[0] - scores[1]);
+            let phrase = `C'est fini ! Score final : ${scores[0]} à ${scores[1]}. `;
+            phrase += `Félicitations à ${gagnants} qui l'emportent avec ${ecart} points d'avance. `;
+            phrase += `Quant à ${perdants}, il est peut-être temps de changer de partenaire ou de s'entraîner à la belote de comptoir !`;
+            annonceVocale(phrase);
+        }
+
+        function MAJ_Tableau() {
+            document.getElementById("scoreEquipe1").textContent = scores[0];
+            document.getElementById("scoreEquipe2").textContent = scores[1];
+            document.getElementById("valeurEcart").textContent = Math.abs(scores[0] - scores[1]);
+            const tbody = document.getElementById("tableauHistorique");
+            tbody.innerHTML = "";
+            historique.forEach(h => {
+                let r = tbody.insertRow();
+                r.innerHTML = `<td>${h.t}</td><td>${h.p1}</td><td>${h.p2}</td><td>${h.at}</td><td>${h.pr}</td>`;
+            });
+        }
+
+        function ajouterBeloteEnMemoire() {
+            if(tour > 12) return;
+            const r = document.getElementsByName("equipeSelectionnee");
+            let eq = r[0].checked ? 0 : 1;
+            beloteEnAttente = eq;
+            let p = (eq === 0) ? (joueurs[0] + " et " + joueurs[2]) : (joueurs[1] + " et " + joueurs[3]);
+            document.getElementById("star1").textContent = (eq === 0) ? "⭐ Belote" : "";
+            document.getElementById("star2").textContent = (eq === 1) ? "⭐ Belote" : "";
+            annonceVocale("Belote enregistrée pour " + p);
+        }
+
+        function ajouterCapot() {
+            if(tour > 12) return;
+            const r = document.getElementsByName("equipeSelectionnee");
+            let eq = r[0].checked ? 0 : 1;
+            let p = (eq === 0) ? (joueurs[0] + " et " + joueurs[2]) : (joueurs[1] + " et " + joueurs[3]);
+            document.getElementById(`pointsEquipe${eq+1}`).value = 252;
+            document.getElementById(`pointsEquipe${eq===0?2:1}`).value = 0;
+            annonceVocale("Capot enregistré pour " + p);
+            validerTour();
+        }
+
+        function annulerDernier() {
+            if (historique.length === 0) return;
+            if (tour > 12) {
+                tour = 13;
+                document.getElementById("btnValider").disabled = false;
+                document.getElementById("overlayFin").style.display = "none";
+                partieEnCours = true;
+            }
+            const last = historique.pop();
+            scores[0] -= last.p1; scores[1] -= last.p2;
+            if (tour > 1) { tour--; dIdx = (dIdx - 1 + 4) % 4; }
+            document.getElementById("tourActuel").textContent = tour + "/12";
+            MAJ_Tableau(); MAJ_Donneur();
+        }
+
+        function donneurSuivantManuel() { if(tour <= 12) { dIdx = (dIdx + 1) % 4; MAJ_Donneur(); } }
+        function annonceManuelle() { annonceVocale(scores[0] + " à " + scores[1]); }
+        function confirmationNouvellePartie() { if(confirm("Recommencer ?")) { partieEnCours = false; location.reload(); } }
+        function afficherPage(p) {
+            document.getElementById('pageJeu').style.display = (p==='jeu'?'block':'none');
+            document.getElementById('pageHistorique').style.display = (p==='hist'?'block':'none');
+        }
+
+        window.onload = () => {
+            if(localStorage.getItem('belote_j1')) document.getElementById('j1').value = localStorage.getItem('belote_j1');
+            if(localStorage.getItem('belote_j2')) document.getElementById('j2').value = localStorage.getItem('belote_j2');
+            if(localStorage.getItem('belote_j3')) document.getElementById('j3').value = localStorage.getItem('belote_j3');
+            if(localStorage.getItem('belote_j4')) document.getElementById('j4').value = localStorage.getItem('belote_j4');
+            new bootstrap.Modal(document.getElementById('saisieJoueursModal')).show();
+        };
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./swmistral.js');
+        }
+    </script>
+</body>
+</html>
