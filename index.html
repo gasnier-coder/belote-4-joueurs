@@ -2,301 +2,369 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>TAROT C.GASNIER</title>
-    <link rel="icon" type="image/png" href="favicon.png/icon-192.png">
+    <title>Belote / C.Gasnier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#3CB371">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#064e3b">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
-        body { background-color: #064e3b; color: white; font-family: sans-serif; }
-        .table-box { background: #1f2937; border: 2px solid #374151; border-radius: 12px; padding: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4); height: fit-content; }
-        
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-
-        .input-score { width: 62px; height: 45px; color: black; text-align: center; font-weight: 800; border-radius: 6px; border: 1px solid rgba(0,0,0,0.2); font-size: 1.1rem; }
-        .input-score:focus { outline: none; border-color: #fbbf24; background-color: #fff !important; }
-
-        .col-d1 { background-color: #fef08a !important; }
-        .col-d2 { background-color: #bbf7d0 !important; }
-        .col-d3 { background-color: #bfdbfe !important; }
-        .col-d4 { background-color: #fbcfe8 !important; }
-        .col-d5 { background-color: #fed7aa !important; }
-        .col-d6 { background-color: #ddd6fe !important; }
-
-        .balance-ok { color: #10b981; font-weight: 900; font-size: 0.75rem; }
-        .balance-err { color: #ef4444; background: rgba(239, 68, 68, 0.2); border-radius: 4px; font-weight: 900; font-size: 0.75rem; padding: 2px; } 
-        
-        .tab-btn { padding: 12px 20px; font-weight: bold; border-radius: 10px; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.8rem; }
-        .active { background: #facc15 !important; color: black !important; }
-        
-        .pos-label { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; margin-bottom: -2px; }
-        
-        .color-0 { color: #facc15; }
-        .color-1 { color: #34d399; }
-        .color-2 { color: #60a5fa; }
-        .color-3 { color: #f472b6; }
-
-        .nom-joueur { font-size: 0.85rem; color: white; text-transform: uppercase; font-weight: 700; line-height: 1.1; word-break: break-word; max-width: 130px; }
-        
-        /* Notification de sauvegarde */
-        #toast { visibility: hidden; min-width: 250px; background-color: #10b981; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-
-        @media print {
-            .no-print, header, nav, .tab-btn, h1, #sec-inscriptions, #sec-parties, .flex, #toast { display: none !important; }
-            body { background: white !important; color: black !important; padding: 0 !important; }
-            #sec-classement { display: block !important; border: 2px solid black !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 20px !important; background: white !important; color: black !important; box-shadow: none !important; }
-            #classement-content table { color: black !important; }
-            .text-yellow-400, .text-emerald-500 { color: black !important; }
-        }
+        body { background: linear-gradient(to bottom, #2E8B57, #3CB371); padding: 5px; min-height: 100vh; color: white; font-family: sans-serif; overflow-x: hidden; }
+        .main-container { max-width: 600px; margin: 0 auto; padding: 2px; position: relative; }
+        .card { margin-bottom: 5px; color: black; border-radius: 10px; }
+        .atout-display { width: 80px; height: 80px; border: 3px solid black; border-radius: 12px; background-color: white; display: flex; justify-content: center; align-items: center; font-size: 4rem; margin: 0 auto 2px; color: black; line-height: 1; }
+        .atout-option { width: 42px; height: 42px; border: 2px solid black; border-radius: 8px; background-color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.5rem; }
+        .atout-selector { display: flex; gap: 5px; justify-content: center; margin-bottom: 5px; }
+        .score-zone { position: relative; }
+        .mini-clavier { display: none; grid-template-columns: repeat(3, 1fr); gap: 2px; position: absolute; top: 100%; left: 0; width: 100%; z-index: 100; background: rgba(0,0,0,0.9); padding: 5px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .key { border: 1px solid rgba(255,255,255,0.2); font-weight: bold; font-size: 1.3rem; padding: 10px 0; cursor: pointer; text-align: center; border-radius: 4px; }
+        .key-0 { grid-column: 2; }
+        .clavier-eq1 .key { background-color: #007bff; color: white; }
+        .clavier-eq2 .key { background-color: #dc3545; color: white; }
+        .score-input { width: 85px; height: 50px; font-size: 1.6rem; text-align: center; margin: 0 auto; border: 2px solid white; border-radius: 8px; background: white; color: black; }
+        .score-input.active { border: 3px solid #FFD700 !important; box-shadow: 0 0 10px #FFD700; }
+        #valeurEcart { font-size: 2.2rem !important; line-height: 1; }
+        .badge-tour-central { font-size: 0.9rem !important; padding: 5px; border: 1px solid #FFD700; line-height: 1.1; width: 100%; display: block; }
+        .donneur-highlight { color: #FFD700; text-shadow: 1px 1px 2px black; font-weight: bold; }
+        .belote-indicator { font-size: 0.9rem; color: #FFD700; display: block; height: 1.2rem; font-weight: bold; }
+        #pageHistorique { display: none; }
+        .belote-capot-row { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-around; font-size: 0.9rem; }
+        .radio-group { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .radio-group input { cursor: pointer; width: 18px; height: 18px; }
+        #overlayFin { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; border-radius: 10px; align-items: center; justify-content: center; font-weight: bold; font-size: 1.8rem; text-align: center; color: #FFD700; padding: 20px; }
     </style>
 </head>
-<body class="p-4">
 
-    <div id="toast">✅ Sauvegarde effectuée !</div>
+<body>
+    <div class="main-container">
+        <div id="overlayFin" onclick="this.style.display='none'">PARTIE TERMINÉE !<br><small style="font-size: 1rem; color: white;">(Cliquez pour voir les scores)</small></div>
+        
+        <div class="nav-btn-container text-center mb-1" id="navBtns" style="display: none;">
+            <button class="btn btn-sm btn-light" onclick="afficherPage('jeu')">Score</button>
+            <button class="btn btn-sm btn-outline-light" onclick="afficherPage('hist')">Historique</button>
+        </div>
 
-    <div class="text-center mb-8 no-print">
-        <h1 class="text-3xl font-black text-yellow-400 uppercase italic tracking-tighter mb-6">CONCOURS TAROT C.GASNIER</h1>
-        <div class="flex flex-wrap justify-center items-center gap-3">
-            <button onclick="clearAllData()" class="bg-red-900/50 hover:bg-red-700 text-red-200 text-[10px] font-black uppercase px-4 py-3 rounded-lg transition mr-4 border border-red-500/30">🗑️ Reset</button>
-            <div class="flex gap-2">
-                <button onclick="showSection('inscriptions')" id="btn-inscriptions" class="tab-btn bg-emerald-900 active">1. Inscriptions</button>
-                <button onclick="showSection('parties')" id="btn-parties" class="tab-btn bg-emerald-800">2. Tables / Donnes</button>
-                <button onclick="showSection('classement')" id="btn-classement" class="tab-btn bg-emerald-900">3. Classement</button>
+        <div id="pageJeu">
+            <div id="setupTour" style="display: none;" class="text-center mb-2">
+                <div class="atout-selector">
+                    <div class="atout-option text-danger" onclick="selectAtout('♥', 'text-danger')">♥</div>
+                    <div class="atout-option text-dark" onclick="selectAtout('♠', 'text-dark')">♠</div>
+                    <div class="atout-option text-danger" onclick="selectAtout('♦', 'text-danger')">♦</div>
+                    <div class="atout-option text-dark" onclick="selectAtout('♣', 'text-dark')">♣</div>
+                </div>
+                <select id="selectPreneur" class="form-select form-select-sm mb-1 mx-auto" style="max-width: 150px;" onchange="annoncerPreneur()"></select>
             </div>
-            <div class="flex gap-2 ml-4">
-                <button onclick="exportToJson()" title="Exporter JSON" class="bg-gray-700 hover:bg-gray-600 text-white text-[10px] font-black uppercase px-4 py-3 rounded-lg transition border border-white/10">💾 Sauver</button>
-                <button onclick="document.getElementById('fileInput').click()" title="Charger JSON" class="bg-gray-700 hover:bg-gray-600 text-white text-[10px] font-black uppercase px-4 py-3 rounded-lg transition border border-white/10">📂 Charger</button>
-                <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importFromJson(event)">
+
+            <div class="text-center mb-2">
+                <div class="atout-display" id="atoutDisplay"></div>
+                <h5 class="mb-0">Belote / C. Gasnier</h5>
+                <div class="small">Donneur : <span id="donneur" class="donneur-highlight">Aucun</span> <i class="fas fa-redo ms-1" onclick="donneurSuivantManuel()"></i></div>
             </div>
+
+            <div class="row g-2 align-items-start mb-3" style="min-height: 180px;">
+                <div class="col-5 text-center score-zone">
+                    <span id="star1" class="belote-indicator"></span>
+                    <div class="card bg-light mb-1">
+                        <div class="card-header bg-primary text-white p-1 small text-truncate" id="nomEquipe1">Eq 1</div>
+                        <div class="card-body p-2"><p class="h3 mb-0" id="scoreEquipe1">0</p></div>
+                    </div>
+                    <input type="text" id="pointsEquipe1" class="form-control score-input" onclick="toggleClavier(1)" readonly placeholder="0">
+                    <div id="clavier1" class="mini-clavier clavier-eq1">
+                        <div class="key" onclick="ajouterChiffre(1)">1</div><div class="key" onclick="ajouterChiffre(2)">2</div><div class="key" onclick="ajouterChiffre(3)">3</div>
+                        <div class="key" onclick="ajouterChiffre(4)">4</div><div class="key" onclick="ajouterChiffre(5)">5</div><div class="key" onclick="ajouterChiffre(6)">6</div>
+                        <div class="key" onclick="ajouterChiffre(7)">7</div><div class="key" onclick="ajouterChiffre(8)">8</div><div class="key" onclick="ajouterChiffre(9)">9</div>
+                        <div class="key key-0" onclick="ajouterChiffre(0)">0</div>
+                    </div>
+                </div>
+
+                <div class="col-2 text-center px-0 pt-3">
+                    <div class="small text-white-50" style="font-size: 0.7rem;">DIFF</div>
+                    <div class="fw-bold text-warning mb-2" id="valeurEcart">0</div>
+                    <span class="badge bg-dark badge-tour-central">TOUR<br><span id="tourActuel">1/12</span></span>
+                </div>
+
+                <div class="col-5 text-center score-zone">
+                    <span id="star2" class="belote-indicator"></span>
+                    <div class="card bg-light mb-1">
+                        <div class="card-header bg-danger text-white p-1 small text-truncate" id="nomEquipe2">Eq 2</div>
+                        <div class="card-body p-2"><p class="h3 mb-0" id="scoreEquipe2">0</p></div>
+                    </div>
+                    <input type="text" id="pointsEquipe2" class="form-control score-input" onclick="toggleClavier(2)" readonly placeholder="0">
+                    <div id="clavier2" class="mini-clavier clavier-eq2">
+                        <div class="key" onclick="ajouterChiffre(1)">1</div><div class="key" onclick="ajouterChiffre(2)">2</div><div class="key" onclick="ajouterChiffre(3)">3</div>
+                        <div class="key" onclick="ajouterChiffre(4)">4</div><div class="key" onclick="ajouterChiffre(5)">5</div><div class="key" onclick="ajouterChiffre(6)">6</div>
+                        <div class="key" onclick="ajouterChiffre(7)">7</div><div class="key" onclick="ajouterChiffre(8)">8</div><div class="key" onclick="ajouterChiffre(9)">9</div>
+                        <div class="key key-0" onclick="ajouterChiffre(0)">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="belote-capot-row">
+                <div class="fw-bold">Belote / Capot :</div>
+                <div class="radio-group" onclick="document.getElementById('eq1').checked=true">
+                    <input type="radio" name="equipeSelectionnee" id="eq1" value="0" checked>
+                    <span>Équipe 1</span>
+                </div>
+                <div class="radio-group" onclick="document.getElementById('eq2').checked=true">
+                    <input type="radio" name="equipeSelectionnee" id="eq2" value="1">
+                    <span>Équipe 2</span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-2 mb-3">
+                <button class="btn btn-primary px-4" id="btnValider" onclick="validerTour()">Valider Tour</button>
+                <button class="btn btn-warning px-4" onclick="effacerChiffres()">Effacer</button>
+            </div>
+
+            <div class="text-center">
+                <div class="d-flex flex-wrap justify-content-center gap-1 mb-2">
+                    <button class="btn btn-success" onclick="ajouterBeloteEnMemoire()">Belote</button>
+                    <button class="btn btn-danger" onclick="ajouterCapot()">Capot</button>
+                    <button class="btn btn-info text-white" onclick="annonceManuelle()"><i class="fas fa-volume-up"></i> Score</button>
+                    <button class="btn btn-secondary" onclick="annulerDernier()">Annuler</button>
+                    <button class="btn btn-dark" onclick="confirmationNouvellePartie()">Nouv. Partie</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="pageHistorique">
+            <h5 class="text-center">Historique</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-dark table-striped text-center">
+                    <thead><tr><th>T</th><th>Éq1</th><th>Éq2</th><th>Atout</th><th>Preneur</th></tr></thead>
+                    <tbody id="tableauHistorique"></tbody>
+                </table>
+            </div>
+            <button class="btn btn-primary w-100 mt-2" onclick="afficherPage('jeu')">Retour</button>
         </div>
     </div>
 
-    <section id="sec-inscriptions" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 no-print">
-        <div class="bg-black/40 p-10 rounded-2xl border border-white/10 shadow-xl">
-            <div class="mb-8 pb-6 border-b border-white/10">
-                <h2 class="text-sm font-black text-yellow-400 uppercase mb-4 tracking-widest">⚙️ Configuration</h2>
-                <div class="flex items-center gap-4 flex-wrap">
-                    <label class="text-xs font-bold uppercase opacity-60">Parties :</label>
-                    <select id="nbPartiesSelect" onchange="changeNbParties(this.value)" class="bg-white text-black font-black px-4 py-2 rounded-lg text-sm outline-none">
-                        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option>
-                    </select>
-                    <a href="https://drive.google.com/file/d/1C-meUfZkFz29jbWjWTBssd8NJu279BUq/view" target="_blank" class="bg-yellow-600 hover:bg-yellow-500 text-white font-black px-4 py-2 rounded-lg text-[10px] uppercase shadow-lg transition">📄 Fiche Score</a>
-                </div>
-            </div>
-            <h2 class="text-sm font-black text-emerald-400 uppercase mb-4 tracking-widest">📥 Importation noms</h2>
-            <textarea id="importArea" rows="8" class="w-full p-4 mb-4 text-black font-bold text-sm rounded-xl outline-none" placeholder="Un nom par ligne..."></textarea>
-            <div class="flex gap-2">
-                <button onclick="importList()" class="flex-1 bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-black text-white uppercase text-xs shadow-lg transition">Importer (Nord)</button>
-                <button onclick="autoDistribute()" class="flex-1 bg-purple-600 hover:bg-purple-500 py-4 rounded-xl font-black text-white uppercase text-xs shadow-lg transition">Importer + Dispatcher N/S/E/O</button>
-            </div>
-            <div class="mt-8 pt-6 border-t border-white/5 flex gap-3 flex-wrap">
-                <input type="text" id="addName" placeholder="NOM PRÉNOM" class="flex-1 p-3.5 rounded-lg text-black font-bold uppercase text-sm outline-none" onkeypress="if(event.key==='Enter') addPlayer()">
-                <select id="addPos" class="bg-white text-black font-bold p-3 rounded-lg text-sm">
-                    <option value="0">NORD</option><option value="1">SUD</option><option value="2">EST</option><option value="3">OUEST</option>
+    <div class="modal fade" id="saisieJoueursModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog"><div class="modal-content text-dark">
+            <div class="modal-header"><h5>Nouvelle Partie</h5></div>
+            <div class="modal-body">
+                <input type="text" id="j1" class="form-control mb-2" placeholder="Vous">
+                <input type="text" id="j2" class="form-control mb-2" placeholder="Joueur G">
+                <input type="text" id="j3" class="form-control mb-2" placeholder="Partenaire">
+                <input type="text" id="j4" class="form-control mb-2" placeholder="Joueur D">
+                <label class="small fw-bold">Donneur :</label>
+                <select id="pDonneur" class="form-select">
+                    <option value="0">Vous</option><option value="1">Joueur G</option><option value="2">Partenaire</option><option value="3">Joueur D</option>
                 </select>
-                <button onclick="addPlayer()" class="bg-emerald-500 px-6 rounded-lg font-black text-xl hover:bg-emerald-400 transition">+</button>
             </div>
-        </div>
-        <div class="bg-black/20 p-10 rounded-2xl border border-white/5 shadow-inner">
-            <h2 class="text-sm font-black text-yellow-500 uppercase mb-4 italic tracking-widest">📋 Liste des Inscrits</h2>
-            <div id="playerList" class="grid grid-cols-1 gap-2.5 max-h-[480px] overflow-y-auto pr-3 custom-scroll"></div>
-            <div class="mt-8 border-t border-white/10 pt-4 flex justify-end">
-                <div class="font-black text-yellow-400 text-base italic" id="statCount">0 Joueurs</div>
-            </div>
-        </div>
-    </section>
+            <div class="modal-footer"><button class="btn btn-primary w-100" onclick="demarrer()">Go !</button></div>
+        </div></div>
+    </div>
 
-    <section id="sec-parties" class="hidden no-print">
-        <div class="flex flex-wrap gap-2 mb-8 justify-center" id="nav-parties"></div>
-        <div id="zone-tables" class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1400px] mx-auto px-2"></div>
-    </section>
-
-    <section id="sec-classement" class="hidden max-w-xl mx-auto bg-black/60 p-8 rounded-2xl border-2 border-yellow-500 relative shadow-2xl">
-        <button onclick="window.print()" class="absolute top-4 right-6 bg-yellow-500 text-black px-5 py-1 rounded-full font-black text-xs no-print hover:bg-yellow-400 transition italic">IMPRIMER PDF</button>
-        <div id="classement-content" class="mt-4"></div>
-    </section>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let allPlayers = JSON.parse(localStorage.getItem('tarot_players')) || []; 
-        let donnesData = JSON.parse(localStorage.getItem('tarot_scores')) || {}; 
-        let totalParties = parseInt(localStorage.getItem('tarot_nb_parties')) || 4;
-        let currentIdx = 0;
+        let scores = [0, 0], historique = [], joueurs = [], tour = 1, dIdx = 0, eqActive = 0, atout = "", partieEnCours = false, beloteEnAttente = null;
 
-        window.onbeforeunload = function() { return "Attention, vos données non sauvegardées seront perdues."; };
+        window.addEventListener('beforeunload', (e) => {
+            if (partieEnCours) {
+                e.preventDefault();
+                e.returnValue = 'La partie est en cours. Voulez-vous vraiment quitter ?';
+            }
+        });
 
-        function showToast() {
-            const x = document.getElementById("toast");
-            x.className = "show";
-            setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
-        }
-
-        function saveData() {
-            localStorage.setItem('tarot_players', JSON.stringify(allPlayers));
-            localStorage.setItem('tarot_scores', JSON.stringify(donnesData));
-            localStorage.setItem('tarot_nb_parties', totalParties);
-        }
-
-        function exportToJson() {
-            const dateStr = new Date().toLocaleString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(/[/:]/g, '-');
-            const dataToSave = { date: new Date().toISOString(), nbParties: totalParties, players: allPlayers, scores: donnesData };
-            const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `Tournoi_Tarot_${dateStr}.json`; a.click(); URL.revokeObjectURL(url);
-            showToast(); // Confirmation visuelle
-        }
-
-        function importFromJson(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (confirm("Charger cette sauvegarde ? Cela écrasera les données actuelles.")) {
-                        allPlayers = data.players || []; donnesData = data.scores || {}; totalParties = data.nbParties || 4;
-                        document.getElementById('nbPartiesSelect').value = totalParties; saveData(); renderInscriptions(); alert("Sauvegarde chargée !");
-                    }
-                } catch (err) { alert("Erreur : Fichier invalide."); }
-            };
-            reader.readAsText(file); event.target.value = '';
-        }
-
-        function changeNbParties(val) {
-            totalParties = parseInt(val); saveData();
-            if (currentIdx >= totalParties) currentIdx = 0;
-            if (!document.getElementById('sec-parties').classList.contains('hidden')) renderPartie(currentIdx);
-        }
-
-        function clearAllData() {
-            if(confirm("⚠ RESET COMPLET DU TOURNOI ?")) {
-                allPlayers = []; donnesData = {}; localStorage.clear();
-                renderInscriptions(); showSection('inscriptions');
+        function annonceVocale(txt) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(txt);
+                u.lang = 'fr-FR';
+                window.speechSynthesis.speak(u);
             }
         }
 
-        function addPlayer() {
-            const input = document.getElementById('addName');
-            const name = input.value.trim().toUpperCase();
-            if (name) { 
-                allPlayers.push({ nom: name, posInitiale: parseInt(document.getElementById('addPos').value) }); 
-                input.value = ""; saveData(); renderInscriptions(); 
+        function toggleClavier(n) {
+            if(tour > 12) return;
+            eqActive = (eqActive === n) ? 0 : n;
+            document.getElementById("pointsEquipe1").classList.toggle("active", eqActive === 1);
+            document.getElementById("pointsEquipe2").classList.toggle("active", eqActive === 2);
+            document.getElementById("clavier1").style.display = (eqActive === 1) ? "grid" : "none";
+            document.getElementById("clavier2").style.display = (eqActive === 2) ? "grid" : "none";
+        }
+
+        function ajouterChiffre(c) {
+            if (eqActive === 0) return;
+            const inp = document.getElementById(`pointsEquipe${eqActive}`);
+            const autreInp = document.getElementById(`pointsEquipe${eqActive===1?2:1}`);
+            let val = inp.value + c;
+            if (parseInt(val) <= 162) {
+                inp.value = parseInt(val);
+                autreInp.value = 162 - parseInt(val);
             }
         }
 
-        function importList() {
-            document.getElementById('importArea').value.split('\n').forEach(line => {
-                const clean = line.trim().toUpperCase(); if (clean) allPlayers.push({ nom: clean, posInitiale: 0 });
+        function effacerChiffres() { 
+            document.getElementById("pointsEquipe1").value = ""; 
+            document.getElementById("pointsEquipe2").value = ""; 
+            beloteEnAttente = null;
+            document.getElementById("star1").textContent = "";
+            document.getElementById("star2").textContent = "";
+        }
+
+        function selectAtout(s, c) { 
+            if(tour > 12) return;
+            atout = s; 
+            document.getElementById("atoutDisplay").innerHTML = `<span class="${c}">${s}</span>`;
+            let n = s==='♥'?'Cœur':s==='♠'?'Pique':s==='♦'?'Carreau':'Trèfle';
+            annonceVocale("L'atout pour ce tour est " + n);
+        }
+
+        function annoncerPreneur() {
+            const sel = document.getElementById("selectPreneur");
+            const nom = sel.options[sel.selectedIndex].text;
+            if (sel.value !== "" && tour <= 12) {
+                annonceVocale("C'est " + nom + " qui a pris");
+            }
+        }
+
+        function MAJ_Donneur() { 
+            const n = joueurs[dIdx];
+            document.getElementById("donneur").textContent = n; 
+            if(partieEnCours && tour <= 12) annonceVocale("Le donneur pour ce tour est " + n);
+        }
+
+        function demarrer() {
+            joueurs = [
+                document.getElementById("j1").value || "Vous", 
+                document.getElementById("j2").value || "J.G", 
+                document.getElementById("j3").value || "Partenaire", 
+                document.getElementById("j4").value || "J.D"
+            ];
+            localStorage.setItem('belote_j1', joueurs[0]);
+            localStorage.setItem('belote_j2', joueurs[1]);
+            localStorage.setItem('belote_j3', joueurs[2]);
+            localStorage.setItem('belote_j4', joueurs[3]);
+            const sel = document.getElementById("selectPreneur");
+            sel.innerHTML = '<option value="">Preneur ?</option>';
+            joueurs.forEach((j, i) => { sel.innerHTML += `<option value="${i}">${j}</option>`; });
+            dIdx = parseInt(document.getElementById("pDonneur").value);
+            document.getElementById("nomEquipe1").textContent = joueurs[0] + " & " + joueurs[2];
+            document.getElementById("nomEquipe2").textContent = joueurs[1] + " & " + joueurs[3];
+            document.getElementById("setupTour").style.display = "block";
+            document.getElementById("navBtns").style.display = "block";
+            partieEnCours = true;
+            MAJ_Donneur();
+            bootstrap.Modal.getInstance(document.getElementById("saisieJoueursModal")).hide();
+        }
+
+        function validerTour() {
+            if(tour > 12) return;
+            const selP = document.getElementById("selectPreneur");
+            let preneurNom = selP.selectedIndex > 0 ? selP.options[selP.selectedIndex].text : "-";
+            
+            let p1 = parseInt(document.getElementById("pointsEquipe1").value) || 0;
+            let p2 = parseInt(document.getElementById("pointsEquipe2").value) || 0;
+            if (p1 === 0 && p2 === 0) return;
+            if (beloteEnAttente === 0) p1 += 20; else if (beloteEnAttente === 1) p2 += 20;
+            
+            historique.push({ t: tour, p1, p2, at: atout, pr: preneurNom });
+            scores[0] += p1; scores[1] += p2;
+            MAJ_Tableau(); effacerChiffres();
+            atout = ""; document.getElementById("atoutDisplay").innerHTML = "";
+            document.getElementById("selectPreneur").value = "";
+            
+            if (tour < 12) {
+                tour++; dIdx = (dIdx + 1) % 4;
+                document.getElementById("tourActuel").textContent = tour + "/12";
+                MAJ_Donneur();
+            } else {
+                tour = 13;
+                partieEnCours = false;
+                document.getElementById("tourActuel").textContent = "FIN";
+                document.getElementById("btnValider").disabled = true;
+                document.getElementById("overlayFin").style.display = "flex";
+                annoncerFinPartie();
+            }
+            eqActive = 0;
+            document.getElementById("clavier1").style.display = "none";
+            document.getElementById("clavier2").style.display = "none";
+        }
+
+        function annoncerFinPartie() {
+            let gagnants = scores[0] > scores[1] ? (joueurs[0] + " et " + joueurs[2]) : (joueurs[1] + " et " + joueurs[3]);
+            let perdants = scores[0] > scores[1] ? (joueurs[1] + " et " + joueurs[3]) : (joueurs[0] + " et " + joueurs[2]);
+            let ecart = Math.abs(scores[0] - scores[1]);
+            let phrase = `C'est fini ! Score final : ${scores[0]} à ${scores[1]}. `;
+            phrase += `Félicitations à ${gagnants} qui l'emportent avec ${ecart} points d'avance. `;
+            phrase += `Quant à ${perdants}, il est peut-être temps de changer de partenaire ou de s'entraîner à la belote de comptoir !`;
+            annonceVocale(phrase);
+        }
+
+        function MAJ_Tableau() {
+            document.getElementById("scoreEquipe1").textContent = scores[0];
+            document.getElementById("scoreEquipe2").textContent = scores[1];
+            document.getElementById("valeurEcart").textContent = Math.abs(scores[0] - scores[1]);
+            const tbody = document.getElementById("tableauHistorique");
+            tbody.innerHTML = "";
+            historique.forEach(h => {
+                let r = tbody.insertRow();
+                r.innerHTML = `<td>${h.t}</td><td>${h.p1}</td><td>${h.p2}</td><td>${h.at}</td><td>${h.pr}</td>`;
             });
-            document.getElementById('importArea').value = ""; saveData(); renderInscriptions();
         }
 
-        function autoDistribute() {
-            document.getElementById('importArea').value.split('\n').filter(l => l.trim() !== "").forEach((line, idx) => {
-                allPlayers.push({ nom: line.trim().toUpperCase(), posInitiale: idx % 4 });
-            });
-            document.getElementById('importArea').value = ""; saveData(); renderInscriptions();
+        function ajouterBeloteEnMemoire() {
+            if(tour > 12) return;
+            const r = document.getElementsByName("equipeSelectionnee");
+            let eq = r[0].checked ? 0 : 1;
+            beloteEnAttente = eq;
+            let p = (eq === 0) ? (joueurs[0] + " et " + joueurs[2]) : (joueurs[1] + " et " + joueurs[3]);
+            document.getElementById("star1").textContent = (eq === 0) ? "⭐ Belote" : "";
+            document.getElementById("star2").textContent = (eq === 1) ? "⭐ Belote" : "";
+            annonceVocale("Belote enregistrée pour " + p);
         }
 
-        function changePlayerPos(idx, newPos) { allPlayers[idx].posInitiale = parseInt(newPos); saveData(); renderInscriptions(); }
-
-        function renderInscriptions() {
-            const list = document.getElementById('playerList'); if (!list) return;
-            list.innerHTML = allPlayers.map((p, i) => `
-                <div class="flex justify-between bg-white/5 p-2 px-4 rounded-lg items-center border border-white/5 gap-2">
-                    <span class="font-mono text-emerald-500 font-bold text-xs w-6">${i+1}</span>
-                    <span class="font-bold flex-1 uppercase truncate text-sm px-2">${p.nom}</span>
-                    <select onchange="changePlayerPos(${i}, this.value)" class="bg-black/40 color-${p.posInitiale} text-[10px] font-black rounded px-2 py-1 outline-none border border-white/10">
-                        <option value="0" ${p.posInitiale === 0 ? 'selected' : ''}>NORD</option><option value="1" ${p.posInitiale === 1 ? 'selected' : ''}>SUD</option><option value="2" ${p.posInitiale === 2 ? 'selected' : ''}>EST</option><option value="3" ${p.posInitiale === 3 ? 'selected' : ''}>OUEST</option>
-                    </select>
-                    <button onclick="allPlayers.splice(${i},1);saveData();renderInscriptions()" class="text-red-500 font-black px-2">×</button>
-                </div>
-            `).join('');
-            document.getElementById('statCount').innerText = allPlayers.length + " Joueurs (" + Math.floor(allPlayers.length/4) + " Tables)";
+        function ajouterCapot() {
+            if(tour > 12) return;
+            const r = document.getElementsByName("equipeSelectionnee");
+            let eq = r[0].checked ? 0 : 1;
+            let p = (eq === 0) ? (joueurs[0] + " et " + joueurs[2]) : (joueurs[1] + " et " + joueurs[3]);
+            document.getElementById(`pointsEquipe${eq+1}`).value = 252;
+            document.getElementById(`pointsEquipe${eq===0?2:1}`).value = 0;
+            annonceVocale("Capot enregistré pour " + p);
+            validerTour();
         }
 
-        function showSection(id) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('sec-' + id).classList.remove('hidden');
-            document.getElementById('btn-' + id).classList.add('active');
-            if (id === 'parties') renderPartie(currentIdx);
-            if (id === 'classement') renderClassement();
-        }
-
-        function updateScore(partie, table, donne, pos, val) {
-            if (!donnesData[partie]) donnesData[partie] = {};
-            if (!donnesData[partie][table]) donnesData[partie][table] = Array.from({length:6}, () => [0,0,0,0]);
-            donnesData[partie][table][donne][pos] = parseInt(val) || 0;
-            saveData(); renderPartie(partie); 
-        }
-
-        function renderPartie(idx) {
-            currentIdx = idx;
-            const nbTables = Math.floor(allPlayers.length / 4);
-            document.getElementById('nav-parties').innerHTML = Array.from({length: totalParties}, (_, i) => `<button onclick="renderPartie(${i})" class="tab-btn ${idx === i ? 'active' : 'bg-emerald-800 hover:bg-emerald-700 text-white'}">Partie ${i+1}</button>`).join('');
-            const zone = document.getElementById('zone-tables'); zone.innerHTML = (nbTables === 0) ? "<div class='text-center py-20 opacity-30 text-xl'>Ajoutez des joueurs.</div>" : "";
-            for (let t = 0; t < nbTables; t++) {
-                let tableDiv = document.createElement('div'); tableDiv.className = "table-box";
-                let nomsTable = ["","","",""]; 
-                [0,1,2,3].forEach(posVisual => {
-                    let tO = t;
-                    if (idx > 0) {
-                        if (posVisual === 1) tO = (t - idx + nbTables) % nbTables;
-                        else if (posVisual === 2) tO = (t - (idx * 2) + nbTables * idx) % nbTables;
-                        else if (posVisual === 3) tO = (t + (idx * 2)) % nbTables;
-                    }
-                    let p = allPlayers[(tO * 4) + posVisual]; if(p) nomsTable[p.posInitiale] = p.nom;
-                });
-                let tableHtml = `<div class="flex justify-between items-center mb-3 border-b border-yellow-500/50 pb-1"><span class="text-base font-black text-yellow-400 italic">TABLE ${t+1}</span><span class="text-[9px] font-bold opacity-30 uppercase tracking-widest text-right">S+1 / E+2 / O-2</span></div><table class="w-full"><thead><tr><th class="w-[35%]"></th>${[1,2,3,4,5,6].map(d => `<th class="text-[9px] font-black text-emerald-400">D${d}</th>`).join('')}<th class="text-yellow-500 font-black text-xs">TOT</th></tr></thead><tbody>`;
-                nomsTable.forEach((nom, pos) => {
-                    let totalRow = (donnesData[idx] && donnesData[idx][t]) ? [0,1,2,3,4,5].reduce((acc, d) => acc + (donnesData[idx][t][d][pos] || 0), 0) : 0;
-                    tableHtml += `<tr class="border-b border-white/5"><td class="py-1 pr-1"><div class="pos-label color-${pos}">${["NORD","SUD","EST","OUEST"][pos]}</div><div class="nom-joueur">${nom || "---"}</div></td>
-                        ${[0,1,2,3,4,5].map(d => {
-                            const val = (donnesData[idx] && donnesData[idx][t]) ? donnesData[idx][t][d][pos] : 0;
-                            return `<td class="text-center"><input type="number" value="${val !== 0 ? val : ''}" onfocus="this.select()" onchange="updateScore(${idx},${t},${d},${pos},this.value)" class="input-score col-d${d+1}"></td>`;
-                        }).join('')}<td class="text-center font-black text-lg text-yellow-400 italic">${totalRow}</td></tr>`;
-                });
-                tableHtml += `<tr><td class="text-right pr-2 py-2 text-[8px] font-bold opacity-20 uppercase italic">Balance :</td>`;
-                for (let d = 0; d < 6; d++) {
-                    const balance = (donnesData[idx] && donnesData[idx][t]) ? donnesData[idx][t][d].reduce((a,b)=>a+b, 0) : 0;
-                    tableHtml += `<td class="text-center ${balance === 0 ? 'balance-ok' : 'balance-err'}">${balance === 0 ? 'OK' : balance}</td>`;
-                }
-                tableHtml += `<td></td></tr></tbody></table>`; tableDiv.innerHTML = tableHtml; zone.appendChild(tableDiv);
+        function annulerDernier() {
+            if (historique.length === 0) return;
+            if (tour > 12) {
+                tour = 13;
+                document.getElementById("btnValider").disabled = false;
+                document.getElementById("overlayFin").style.display = "none";
+                partieEnCours = true;
             }
+            const last = historique.pop();
+            scores[0] -= last.p1; scores[1] -= last.p2;
+            if (tour > 1) { tour--; dIdx = (dIdx - 1 + 4) % 4; }
+            document.getElementById("tourActuel").textContent = tour + "/12";
+            MAJ_Tableau(); MAJ_Donneur();
         }
 
-        function renderClassement() {
-            let res = allPlayers.map((p, pIdx) => {
-                let score = 0; const nT = Math.floor(allPlayers.length / 4);
-                for (let pI = 0; pI < totalParties; pI++) {
-                    if (donnesData[pI]) {
-                        for (let t in donnesData[pI]) {
-                            for (let d = 0; d < 6; d++) {
-                                for(let posVisual=0; posVisual<4; posVisual++) {
-                                    let tO = parseInt(t);
-                                    if (pI > 0) {
-                                        if (posVisual === 1) tO = (parseInt(t) - pI + nT) % nT;
-                                        else if (posVisual === 2) tO = (parseInt(t) - (pI * 2) + nT * pI) % nT;
-                                        else if (posVisual === 3) tO = (parseInt(t) + (pI * 2)) % nT;
-                                    }
-                                    if ((tO * 4) + posVisual === pIdx) score += donnesData[pI][t][d][p.posInitiale];
-                                }
-                            }
-                        }
-                    }
-                }
-                return { nom: p.nom, score };
-            }).sort((a,b) => b.score - a.score);
-            document.getElementById('classement-content').innerHTML = `
-                <div class="text-center mb-6"><h2 class="text-3xl font-black text-yellow-400 uppercase italic">CLASSEMENT GÉNÉRAL</h2><p class="text-xs opacity-40 font-bold uppercase tracking-widest mt-2">Tournoi en ${totalParties} parties</p></div>
-                <table class="w-full">${res.map((p, i) => `<tr class="border-b border-white/10 hover:bg-white/5 transition"><td class="py-3 font-black text-emerald-500 text-lg w-16">#${i+1}</td><td class="py-3 font-black uppercase text-sm">${p.nom}</td><td class="py-3 text-right font-black text-yellow-400 text-2xl italic">${p.score}</td></tr>`).join('')}</table>`;
+        function donneurSuivantManuel() { if(tour <= 12) { dIdx = (dIdx + 1) % 4; MAJ_Donneur(); } }
+        function annonceManuelle() { annonceVocale(scores[0] + " à " + scores[1]); }
+        function confirmationNouvellePartie() { if(confirm("Recommencer ?")) { partieEnCours = false; location.reload(); } }
+        function afficherPage(p) {
+            document.getElementById('pageJeu').style.display = (p==='jeu'?'block':'none');
+            document.getElementById('pageHistorique').style.display = (p==='hist'?'block':'none');
         }
-        document.addEventListener('DOMContentLoaded', renderInscriptions);
+
+        window.onload = () => {
+            if(localStorage.getItem('belote_j1')) document.getElementById('j1').value = localStorage.getItem('belote_j1');
+            if(localStorage.getItem('belote_j2')) document.getElementById('j2').value = localStorage.getItem('belote_j2');
+            if(localStorage.getItem('belote_j3')) document.getElementById('j3').value = localStorage.getItem('belote_j3');
+            if(localStorage.getItem('belote_j4')) document.getElementById('j4').value = localStorage.getItem('belote_j4');
+            new bootstrap.Modal(document.getElementById('saisieJoueursModal')).show();
+        };
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./swmistral.js');
+        }
     </script>
 </body>
 </html>
