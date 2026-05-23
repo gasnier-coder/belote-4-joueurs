@@ -2,12 +2,12 @@
 <html lang="fr">
 <head>
   <img 
-    src=https://github.com/gasnier-coder/belote-4-joueurs/blob/main/LOGOGASNIERTECHRONDGIF3.gif?raw=true
-    width="200"
+    src=https://github.com/gasnier-coder/belote-3-joueurs/blob/main/LOGOGASNIERTECHROND3.gif?raw=true
+    width="150"
     style="
       position: absolute;
       top:40px;   /* distance depuis le haut */
-      left: 30px; /* distance depuis la gauche */
+      left: 350px; /* distance depuis la gauche */
     "
     <meta charset="UTF-8">
     <title>Belote / C.Gasnier</title>
@@ -38,7 +38,8 @@
         .score-input.active { border: 3px solid #FFD700 !important; box-shadow: 0 0 10px #FFD700; }
         #valeurEcart { font-size: 2.2rem !important; line-height: 1; }
         .badge-tour-central { font-size: 0.9rem !important; padding: 5px; border: 1px solid #FFD700; line-height: 1.1; width: 100%; display: block; }
-        .donneur-highlight { color: #FFD700; text-shadow: 1px 1px 2px black; font-weight: bold; }
+        .donneur-highlight { color: #FFD700; text-shadow: 1px 1px 2px black; font-weight: bold; font-size: 1.6rem; }
+		/* taille police donneur*/
         .belote-indicator { font-size: 0.9rem; color: #FFD700; display: block; height: 1.2rem; font-weight: bold; }
         #pageHistorique { display: none; }
         .belote-capot-row { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-around; font-size: 0.9rem; }
@@ -65,13 +66,15 @@
                     <div class="atout-option text-danger" onclick="selectAtout('♦', 'text-danger')">♦</div>
                     <div class="atout-option text-dark" onclick="selectAtout('♣', 'text-dark')">♣</div>
                 </div>
-                <select id="selectPreneur" class="form-select form-select-sm mb-1 mx-auto" style="max-width: 150px;" onchange="annoncerPreneur()"></select>
+				<!-- taille de la police de preneur -->
+               <select id="selectPreneur" class="form-select form-select-sm mb-1 mx-auto" style="max-width: 150px; font-size: 1.4rem;" onchange="annoncerPreneur()"></select>
+			   
             </div>
 
             <div class="text-center mb-2">
                 <div class="atout-display" id="atoutDisplay"></div>
-                <h5 class="mb-0">Belote / C. Gasnier</h5>
-                <div class="small">Donneur : <span id="donneur" class="donneur-highlight">Aucun</span> <i class="fas fa-redo ms-1" onclick="donneurSuivantManuel()"></i></div>
+                <h5 class="mb-0"</h5>
+                <div class="fs-3">Donneur : <span id="donneur" class="donneur-highlight">Aucun</span> <i class="fas fa-redo ms-1" onclick="donneurSuivantManuel()"></i></div>
             </div>
 
             <div class="row g-2 align-items-start mb-3" style="min-height: 180px;">
@@ -242,9 +245,9 @@
         function demarrer() {
             joueurs = [
                 document.getElementById("j1").value || "Vous", 
-                document.getElementById("j2").value || "J.G", 
+                document.getElementById("j2").value || "A votre gauche", 
                 document.getElementById("j3").value || "Partenaire", 
-                document.getElementById("j4").value || "J.D"
+                document.getElementById("j4").value || "A votre droite"
             ];
             localStorage.setItem('belote_j1', joueurs[0]);
             localStorage.setItem('belote_j2', joueurs[1]);
@@ -302,7 +305,7 @@
             let ecart = Math.abs(scores[0] - scores[1]);
             let phrase = `C'est fini ! Score final : ${scores[0]} à ${scores[1]}. `;
             phrase += `Félicitations à ${gagnants} qui l'emportent avec ${ecart} points d'avance. `;
-            phrase += `Quant à ${perdants}, il est peut-être temps de changer de partenaire ou de s'entraîner à la belote de comptoir !`;
+            phrase += `Quant à ${perdants}, allez dans votre chambre tout de suite !`;
             annonceVocale(phrase);
         }
 
